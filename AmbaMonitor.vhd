@@ -12,11 +12,11 @@ entity AmbaMonitor is
 		iRST_n 		: in std_logic;
 		--iAPBSI 		: in apb_slv_in_type;
 		--iAPBSO 		: in apb_slv_out_type;
-		--iAHBSI 		: in ahb_slv_in_type;
+		iAHBSI 		: in ahb_slv_in_type;
 		iAHBSO		: in ahb_slv_out_type;
 		--iAHBMI 		: in ahb_mst_in_type;
 		--iAHBMO 		: in ahb_mst_out_type;
-		oMESSAGE 	: out std_logic
+		oERROR 	: out std_logic
 		);
 
 end entity;
@@ -25,24 +25,29 @@ end entity;
 architecture beh of AmbaMonitor is 
 
 	type reg_type is record
-		errorMessage : in std_logic;
-		errorAddr 	 : in std_logic_vector(31 downto 0);
-		errorData    : in std_logic_vector(31 downto 0);
+		errorMessage 	: in std_logic;
+		errorAddr 	 	: in std_logic_vector(31 downto 0);
+		errorData    	: in std_logic_vector(31 downto 0);
+		errorAddrTemp	: in std_logic_vector(31 downto 0);
+		errorDataTemp	: in std_logic_vector(31 downto 0);
 	end record;
 	signal r, rin  : reg_type;
 
 	begin
-		COMB: process(iAHBSO, r)
+		COMB: process(iAHBSO, iAHBSI, r)
 			variable v : reg_type;
 		begin
 			v := r;
+			
+			v.errorMessage := '0'; 
+			v.errorAddrTemp := iAHBSI.haddr; -- 57 s. amba99.pdf
+			v.errorDataTemp := iAHBSI.hwdata; -- automat?
 
-			v.errorMessage := '0'
 
 			if (iAHBSO.hresp = "10") then
 				v.errorMessage := '1';
-				v.errorAddr := iAHBSO.haddr;
-				v.errorData := iAHBSO.hrdata;
+				v.errorAddr := r.errorAddrTemp;
+				v.errorData := r.errorDataTemp;
 			end if;
 
 			rin <= v;
@@ -61,6 +66,5 @@ architecture beh of AmbaMonitor is
 			end if;
 		end process;
 
-	oMESSAGE <= r.errorMessage;
-
+	oERROR <= r.errorMessage;
 end architecture;	
