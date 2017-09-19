@@ -16,13 +16,13 @@ entity AmbaMonitor is
 		iCLK   			: in std_logic;
 		iRST_n 			: in std_logic;
 		iApbSlv 		: in apb_slv_in_type;
-		iAhbSlvOut 		: in ahb_slv_in_type;
-		iAhbSlvIn		: in ahb_slv_out_type;
+		iAhbSlvOut 		: in ahb_slv_out_type;
+		iAhbSlvIn		: in ahb_slv_in_type;
 		--iAHBMI 		: in ahb_mst_in_type;
 		--iAHBMO 		: in ahb_mst_out_type;
-		oApbSlv			: out apb_slv_out_type
+		oApbSlv			: out apb_slv_out_type;
 		oError			: out std_logic;
-		oEAddr 			: out std_logic
+		oEAddr 			: out std_logic_vector(pAddrWidth-1 downto 0)
 		);
 
 end entity;
@@ -38,12 +38,13 @@ architecture beh of AmbaMonitor is
 		monitorState	: tMonitorState;
 		addrFlag		: std_logic;
 		errorMessage 	: std_logic;
-		apbInputData    : std_logic_vector(pwDataWidth-1 downto 0)
-		apbOutputData   : std_logic_vector(pwDataWidth-1 downto 0)
+		apbInputData    : std_logic_vector(pwDataWidth-1 downto 0);
+		apbOutputData   : std_logic_vector(pwDataWidth-1 downto 0);
 		errorAddr 	 	: std_logic_vector(pAddrWidth-1 downto 0);
 		errorAddrTemp	: std_logic_vector(pAddrWidth-1 downto 0);
 		outputAddr		: std_logic_vector(pAddrWidth-1 downto 0);
 		outputError		: std_logic;
+		--apbprdata 			: std_logic_vector(pwDataWidth-1 downto 0);
 		--i 				: integer range 0 to 2;
 	end record;
 	signal r, rin  : reg_type;
@@ -53,7 +54,7 @@ architecture beh of AmbaMonitor is
 			variable v : reg_type;
 		begin
 			v 					:= r;
-			v.addrFlag 			<= '0'
+			v.addrFlag 			:= '0';
 			oApbSlv.pindex 		<= pIndex;
 			v.errorAddrTemp 	:= iAhbSlvIn.haddr;
 			oApbSlv.prdata  	<= (others => '0');
@@ -64,17 +65,17 @@ architecture beh of AmbaMonitor is
 				when stIdle =>
 					if (iAhbSlvOut.hready = '0') then
 						v.errorAddr := r.errorAddrTemp;
-						v.state := stReady_n;
+						v.monitorState := stReady_n;
 					end if;
 				when stReady_n =>
 					if (iAhbSlvOut.hresp = "10") then
-						v.errorMessage <= '1';
-						v.addrFlag <= '1'
+						v.errorMessage := '1';
+						v.addrFlag := '1';
 					else
-						v.state := stIdle;
+						v.monitorState := stIdle;
 					end if;
 				when others =>
-					v.state := stIdle;
+					v.monitorState := stIdle;
 			end case;
 
 			------- APB INTERFACE ---------------
@@ -98,12 +99,12 @@ architecture beh of AmbaMonitor is
 					v.apbSlaveState := stIdle;
 			end case;
 
-			if (addrFlag = '1') then
-				v.outputAddr <= r.errorAddr;
-				v.outputError <= r.errorMessage;
+			if (r.addrFlag = '1') then
+				v.outputAddr := r.errorAddr;
+				v.outputError := r.errorMessage;
 			else
-				v.outputAddr <= (others => '0');
-				v.outputError <= (others => '0');
+				v.outputAddr := (others => '0');
+				v.outputError := '0';
 			end if;
 
 			rin <= v;
@@ -115,8 +116,8 @@ architecture beh of AmbaMonitor is
 				r.errorMessage 		<= '0';
 				r.errorAddr 		<= (others => '0');
 				r.errorAddrTemp 	<= (others => '0');
-				r.errorData 		<= (others => '0');
-				r.errorDataTemp 	<= (others => '0');
+				--r.errorData 		<= (others => '0');
+				--r.errorDataTemp 	<= (others => '0');
 				r.ApbSlaveState		<= stIdle;
 				r.MonitorState 		<= stIdle;
 				r.ApbInputData 		<= (others => '0');

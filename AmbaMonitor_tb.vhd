@@ -100,7 +100,8 @@ architecture sim of AmbaMonitor_tb is
 		ready_v		:= '0'
 		response_v	:= "10"
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-
+		
+		waitCycles(1)
 		check_value(oEAddr, x"10000012", WARNING, "Error response address check");
 		check_value(oError, '1', WARNING, "Error response message check");
 
