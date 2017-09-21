@@ -41,7 +41,7 @@ architecture sim of AmbaMonitor_tb is
 	signal	oEAddr 			: std_logic_vector(pAddrWidth-1 downto 0);
 	signal  dbgi 			: at_slv_dbg_in_type;
 	signal  dbgo 			: at_slv_dbg_out_type;
-	signal EndOfSimulation                   : std_logic := '0';
+	signal  EndOfSimulation : std_logic := '0';
 begin
 	P_CLK: process
 	begin
@@ -83,36 +83,49 @@ begin
 		iRST_n <= '0';
 		wait for (ClkPeriod * 2) * ns;
 		iRST_n <= '1';
-
+		------------------------
 		-- Actual test sequence.
-
+		------------------------
+		--waitCycles(2);
 		-- No error
-		addr_v 		:= x"10000008";
+		addr_v 		:= x"10000004";
 		ready_v		:= '1';
 		response_v	:= "01";
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-		waitCycles(3);
+		--waitCycles(5);
+		check_value(oEAddr, x"00000000", WARNING, "Error response address check");
+		check_value(oError, '0', WARNING, "Error response message check");
 		-- No error
+		addr_v 		:= x"10000008";
+		ready_v		:= '0';
+		response_v	:= "10";			--przetestowac tu blad 01
+		ahbSlvOutputData(addr_v, ready_v, response_v);
+		waitCycles(2);
+		check_value(oEAddr, x"10000004", WARNING, "Error response address check");
+		check_value(oError, '1', WARNING, "Error response message check");
+
 		addr_v 		:= x"10000012";
 		ready_v		:= '1';
 		response_v	:= "01";
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-		waitCycles(5);
+		waitCycles(2);
+		check_value(oEAddr, x"00000000", WARNING, "Error response address check");
+		check_value(oError, '0', WARNING, "Error response message check");
 		-- Error;
 		addr_v 		:= x"10000016";
 		ready_v		:= '0';
 		response_v	:= "10";
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-
-		waitCycles(1);
+		waitCycles(2);
 		check_value(oEAddr, x"10000012", WARNING, "Error response address check");
 		check_value(oError, '1', WARNING, "Error response message check");
 
 		--report_alert_counters();
-		EndOfSimulation <= '1';
-		log(ID_LOG_HDR, "SIMULATION COMPLETED");
 		
-		report "End of simulation." severity failure;
+		log(ID_LOG_HDR, "SIMULATION COMPLETED");
+
+		EndOfSimulation <= '1';
+		report "End of simulation." severity warning;
 		wait;
 
 	end process;

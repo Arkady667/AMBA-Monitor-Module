@@ -58,6 +58,7 @@ architecture beh of AmbaMonitor is
 			oApbSlv.pindex 		<= pIndex;
 			v.errorAddrTemp 	:= iAhbSlvIn.haddr;
 			oApbSlv.prdata  	<= (others => '0');
+			v.errorMessage 		:= '0';
 
 			------ AMBA MONITOR MACHINE -----------
 
