@@ -86,40 +86,60 @@ begin
 		------------------------
 		-- Actual test sequence.
 		------------------------
-		--waitCycles(2);
+		--(1) Clock cycle
 		-- No error
 		addr_v 		:= x"10000004";
 		ready_v		:= '1';
-		response_v	:= "01";
+		response_v	:= "00";
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-		--waitCycles(5);
-		check_value(oEAddr, x"00000000", WARNING, "Error response address check");
-		check_value(oError, '0', WARNING, "Error response message check");
-		-- No error
+		
+		--(2) Clock cycle
 		addr_v 		:= x"10000008";
 		ready_v		:= '0';
-		response_v	:= "10";			--przetestowac tu blad 01
+		response_v	:= "10";			
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-		waitCycles(2);
-		check_value(oEAddr, x"10000004", WARNING, "Error response address check");
-		check_value(oError, '1', WARNING, "Error response message check");
-
-		addr_v 		:= x"10000012";
-		ready_v		:= '1';
-		response_v	:= "01";
-		ahbSlvOutputData(addr_v, ready_v, response_v);
-		waitCycles(2);
 		check_value(oEAddr, x"00000000", WARNING, "Error response address check");
 		check_value(oError, '0', WARNING, "Error response message check");
-		-- Error;
+
+		--(3) Clock cycle
+		addr_v 		:= x"10000012";
+		ready_v		:= '1';
+		response_v	:= "10";
+		ahbSlvOutputData(addr_v, ready_v, response_v);
+
+		--(4) Clock cycle
 		addr_v 		:= x"10000016";
+		ready_v		:= '1';
+		response_v	:= "00";
+		ahbSlvOutputData(addr_v, ready_v, response_v);
+
+		--(5) Clock cycle
+		addr_v 		:= x"10000020";
 		ready_v		:= '0';
 		response_v	:= "10";
 		ahbSlvOutputData(addr_v, ready_v, response_v);
-		waitCycles(2);
-		check_value(oEAddr, x"10000012", WARNING, "Error response address check");
+		wait for 1 ns;
+		check_value(oEAddr, x"10000004", WARNING, "Error response address check");
 		check_value(oError, '1', WARNING, "Error response message check");
 
+		--(6) Clock cycle
+		addr_v 		:= x"10000024";
+		ready_v		:= '1';
+		response_v	:= "10";
+		ahbSlvOutputData(addr_v, ready_v, response_v);
+
+		--(7) Clock cycle
+		addr_v 		:= x"10000028";
+		ready_v		:= '1';
+		response_v	:= "01";
+		ahbSlvOutputData(addr_v, ready_v, response_v);
+		waitCycles(1);
+		wait for 1 ns;
+		check_value(oEAddr, x"10000016", WARNING, "Error response address check");
+		check_value(oError, '1', WARNING, "Error response message check");
+
+		waitCycles(3);
+		
 		--report_alert_counters();
 		
 		log(ID_LOG_HDR, "SIMULATION COMPLETED");
