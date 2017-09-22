@@ -20,9 +20,9 @@ entity AmbaMonitor is
 		iAhbSlvIn		: in ahb_slv_in_type;
 		--iAHBMI 		: in ahb_mst_in_type;
 		--iAHBMO 		: in ahb_mst_out_type;
-		oApbSlv			: out apb_slv_out_type;
-		oError			: out std_logic;
-		oEAddr 			: out std_logic_vector(pAddrWidth-1 downto 0)
+		oApbSlv			: out apb_slv_out_type
+		--oError			: out std_logic;
+		--oEAddr 			: out std_logic_vector(pAddrWidth-1 downto 0)
 		);
 
 end entity;
@@ -55,7 +55,7 @@ architecture beh of AmbaMonitor is
 		begin
 			v 					:= r;
 			v.addrFlag 			:= '0';
-			oApbSlv.pindex 		<= pIndex;
+			--oApbSlv.pindex 		<= pIndex;
 			v.errorAddrTemp 	:= iAhbSlvIn.haddr;
 			oApbSlv.prdata  	<= (others => '0');
 			v.errorMessage 		:= '0';
@@ -101,7 +101,7 @@ architecture beh of AmbaMonitor is
 			end case;
 
 			if (r.addrFlag = '1') then
-				v.outputAddr := r.errorAddr;
+				v.apbOutputData := r.errorAddr;
 				v.outputError := r.errorMessage;
 			else
 				v.outputAddr := (others => '0');
@@ -128,6 +128,6 @@ architecture beh of AmbaMonitor is
 			end if;
 		end process P_SEQ;
 
-	oEAddr <= r.outputAddr;
-	oError <= r.outputError;
+	--oEAddr <= r.outputAddr;
+	--oError <= r.outputError;
 end architecture;	
