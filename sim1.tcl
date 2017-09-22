@@ -20,7 +20,7 @@ uselib uvvm_vvc_framework
 vlib fmf
 vmap fmf fmf
 
-set sim_delta 100ps
+set sim_delta 1ps
 set top_level AmbaMonitor_tb
 set sim_opt "-novopt" 
 
@@ -30,16 +30,19 @@ set library_file_list {
 		"../../../lib/cbk/P3_pkg/AmbaMonitor.vhd"
     }  
 
-    uvvm_vip_spw {
-        "../../../lib/cbk/vvc_pkg/spwvvc/spw_bfm_pkg.vhd"
-        "../../../lib/cbk/vvc_pkg/spwvvc/vvc_cmd_pkg.vhd"
+    uvvm_vip_apb {
+        "../../../lib/cbk/vvc_pkg/apbvvc/apb_bfm_pkg.vhd"
+        "../../../lib/cbk/vvc_pkg/apbvvc/vvc_cmd_pkg.vhd"
         "../../../lib/uvvm_vvc_framework/td_target_support_pkg.vhd"
         "../../../lib/uvvm_vvc_framework/td_vvc_framework_common_methods_pkg.vhd"
-        "../../../lib/cbk/vvc_pkg/spwvvc/vvc_methods_pkg.vhd"
+        "../../../lib/cbk/vvc_pkg/apbvvc/vvc_methods_pkg.vhd"
         "../../../lib/uvvm_vvc_framework/td_queue_pkg.vhd"
         "../../../lib/uvvm_vvc_framework/td_vvc_entity_support_pkg.vhd"
-        "../../../lib/cbk/vvc_pkg/spwvvc/spw_vvc.vhd"
-    }
+        "../../../lib/cbk/vvc_pkg/apbvvc/apb_vvc.vhd"
+	}
+
+	
+    
     work {
 		"AmbaMonitor_tb.vhd"
     }
@@ -54,9 +57,10 @@ set library_file_list {
 # set script_name "sim.tcl"
 
 set library_options_list {
-    uvvm_vip_spw {-2008 -novitalcheck}   
+    #uvvm_vip_spw {-2008 -novitalcheck}   
     cbk  {-2008 -bindAtCompile}
     work {-2008 -bindAtCompile -novopt}
+	uvvm_vip_apb {-2008 -novitalcheck}   
 }
 
 source ../../../bin/mastersim.tcl
